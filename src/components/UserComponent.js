@@ -1,23 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import styles from './UserComponent.module.css';
 import { RotatingSquare } from 'react-loader-spinner';
 
 const UserComponent = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [selectedId, setSelectedId] = useState(null);
-  const [selectedConstraintClass, setSelectedConstraintClass] = useState(null);
-  const [selectedInRule, setSelectedInRule] = useState(null);
-  const [selectedOutRule, setSelectedOutRule] = useState(null);
+  const [selectedValues, setSelectedValues] = useState([]);
 
-  const [selectedData, setSelectedData] = useState({});
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const fetchData = async () => {
     setLoading(true);
     try {
       const res = await axios.get('http://localhost:3001/Constraint_Class');
       setData(res.data.data);
+      // Initialize selectedValues with same length as data and default values
+      setSelectedValues(res.data.data.map(() => ({
+        selectedId: "",
+        selectedConstraintClass: "",
+        selectedInRule: "",
+        selectedOutRule: ""
+      })));
     } catch (error) {
       console.error(error);
     } finally {
@@ -25,26 +30,15 @@ const UserComponent = () => {
     }
   };
 
-  useEffect(() => {
-    const fetchDataBasedOnSelection = async () => {
-      if (selectedId !== null) {
-        setLoading(true);
-        try {
-          const res = await axios.get(`http://localhost:3001/Constraint_Class/${selectedId}`);
-          setSelectedData(res.data.data);
-        } catch (error) {
-          console.error(error);
-        } finally {
-          setLoading(false);
-        }
-      }
-    };
-
-    fetchDataBasedOnSelection();
-  }, [selectedId, selectedConstraintClass, selectedInRule, selectedOutRule]);
-
-  const handleChange = (event, setSelectedValue) => {
-    setSelectedValue(event.target.value);
+  const handleChange = (event, index, key) => {
+    // Use function form of setState when new state depends on previous state
+    setSelectedValues(prevValues => {
+      // Create a new array for immutability
+      const newValues = [...prevValues];
+      // Update the value for the specific field (key) in the object at position (index)
+      newValues[index][key] = event.target.value;
+      return newValues;
+    });
   };
 
   return (
@@ -59,26 +53,18 @@ const UserComponent = () => {
         />
         :
         data.map((record, index) => (
-          <div key={index} className={styles.record}>
-            <select className={styles.dropdown} value={selectedId} onChange={(e) => handleChange(e, setSelectedId)}>
-              {data.map((option, index) => (
-                <option key={index} value={option.Id}>{option.Id}</option>
-              ))}
+          <div key={index}>
+            <select value={selectedValues[index]?.selectedId || ""} onChange={(e) => handleChange(e, index, "selectedId")}>
+              <option value={record.Id || ""}>{record.Id || "Default"}</option>
             </select>
-            <select className={styles.dropdown} value={selectedConstraintClass} onChange={(e) => handleChange(e, setSelectedConstraintClass)}>
-              {data.map((option, index) => (
-                <option key={index} value={option.Constraint_Class}>{option.Constraint_Class}</option>
-              ))}
+            <select value={selectedValues[index]?.selectedConstraintClass || ""} onChange={(e) => handleChange(e, index, "selectedConstraintClass")}>
+              <option value={record.Constraint_Class || ""}>{record.Constraint_Class || "Default"}</option>
             </select>
-            <select className={styles.dropdown} value={selectedInRule} onChange={(e) => handleChange(e, setSelectedInRule)}>
-              {data.map((option, index) => (
-                <option key={index} value={option.In_rule}>{option.In_rule}</option>
-              ))}
+            <select value={selectedValues[index]?.selectedInRule || ""} onChange={(e) => handleChange(e, index, "selectedInRule")}>
+              <option value={record.In_rule || ""}>{record.In_rule || "Default"}</option>
             </select>
-            <select className={styles.dropdown} value={selectedOutRule} onChange={(e) => handleChange(e, setSelectedOutRule)}>
-              {data.map((option, index) => (
-                <option key={index} value={option.Out_Rule}>{option.Out_Rule}</option>
-              ))}
+            <select value={selectedValues[index]?.selectedOutRule || ""} onChange={(e) => handleChange(e, index, "selectedOutRule")}>
+              <option value={record.Out_Rule || ""}>{record.Out_Rule || "Default"}</option>
             </select>
           </div>
         ))}
