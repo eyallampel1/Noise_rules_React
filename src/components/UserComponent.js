@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { RotatingSquare } from 'react-loader-spinner';
+//import the css file 
+
+
 
 const UserComponent = () => {
   const [data, setData] = useState([]);
@@ -54,12 +57,8 @@ const UserComponent = () => {
         :
         data.map((record, index) => (
           <div key={index}>
-            <select value={selectedValues[index]?.selectedId || ""} onChange={(e) => handleChange(e, index, "selectedId")}>
-              <option value={record.Id || ""}>{record.Id || "Default"}</option>
-            </select>
-            <select value={selectedValues[index]?.selectedConstraintClass || ""} onChange={(e) => handleChange(e, index, "selectedConstraintClass")}>
-              <option value={record.Constraint_Class || ""}>{record.Constraint_Class || "Default"}</option>
-            </select>
+            <label className="text-3xl font-bold">{record.Id}</label>
+            <input type='text' className='text-3xl bg-purple-300' value={record.Constraint_Class}></input>
             <select value={selectedValues[index]?.selectedInRule || ""} onChange={(e) => handleChange(e, index, "selectedInRule")}>
               <option value={record.In_rule || ""}>{record.In_rule || "Default"}</option>
             </select>
